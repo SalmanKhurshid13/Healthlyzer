@@ -1,0 +1,6 @@
+fever,cough,headache,vomiting,fatigue,disease
+1,1,1,0,1,Flu
+1,1,0,1,0,Cold
+0,0,1,1,1,Migraine
+1,0,1,1,1,Flu
+0,1,0,1,0,Cold

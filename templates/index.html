@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Healthlyzer — AI Symptom Analyzer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#030712;--surface:#0d1424;--surface2:#111e33;--surface3:#162038;
+      --border:rgba(0,212,255,0.12);--border2:rgba(0,212,255,0.25);
+      --cyan:#00d4ff;--purple:#a855f7;--green:#10b981;
+      --red:#ef4444;--text:#e2e8f0;--muted:#4a6080;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+    .bg-canvas{position:fixed;inset:0;z-index:0;overflow:hidden}
+    .bg-glow1{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(0,212,255,0.06) 0%,transparent 70%);top:-200px;left:-200px;animation:drift1 20s ease-in-out infinite}
+    .bg-glow2{position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(168,85,247,0.05) 0%,transparent 70%);bottom:-100px;right:-100px;animation:drift2 25s ease-in-out infinite}
+    .scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,0.008) 2px,rgba(0,212,255,0.008) 4px);pointer-events:none}
+    @keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(100px,80px)}}
+    @keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-80px,-60px)}}
+    .wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+    header{padding:20px 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(3,7,18,0.8);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;animation:slideDown 0.6s ease both}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+    .logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.3rem;letter-spacing:2px;display:flex;align-items:center;gap:12px;color:var(--cyan);text-shadow:0 0 20px rgba(0,212,255,0.5)}
+    .logo-icon{width:36px;height:36px;border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:1rem;animation:logoPulse 3s ease infinite}
+    @keyframes logoPulse{0%,100%{box-shadow:0 0 10px rgba(0,212,255,0.3)}50%{box-shadow:0 0 25px rgba(0,212,255,0.6)}}
+    .header-right{display:flex;align-items:center;gap:16px}
+    .status-dot{display:flex;align-items:center;gap:8px;font-size:0.75rem;color:var(--muted);font-family:'Orbitron',monospace;letter-spacing:1px}
+    .dot-live{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 2s ease infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+    .nav-badge{font-size:0.7rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:6px 14px;font-family:'Orbitron',monospace;letter-spacing:1px}
+    .hero{padding:60px 48px 40px;text-align:center;animation:fadeUp 0.8s 0.2s ease both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    .hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);padding:8px 20px;margin-bottom:32px;font-family:'Orbitron',monospace}
+    .hero h1{font-family:'Orbitron',monospace;font-size:clamp(2rem,5vw,3.5rem);font-weight:900;line-height:1.05;letter-spacing:-1px;margin-bottom:20px;text-transform:uppercase}
+    .hero h1 .line1{display:block;color:var(--text)}
+    .hero h1 .line2{display:block;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .hero p{font-size:1rem;color:var(--muted);max-width:480px;margin:0 auto;line-height:1.7;font-weight:300}
+    .stats-row{display:flex;justify-content:center;gap:40px;padding:20px 48px 40px;animation:fadeUp 0.8s 0.4s ease both}
+    .stat{text-align:center}
+    .stat-num{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:700;color:var(--cyan)}
+    .stat-label{font-size:0.72rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+    .disclaimer{margin:0 48px 32px;padding:12px 20px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-left:3px solid var(--red);font-size:0.8rem;color:var(--muted);animation:fadeUp 0.8s 0.5s ease both}
+    .disclaimer strong{color:var(--red)}
+    .main-layout{padding:0 48px 80px;display:flex;justify-content:center;animation:fadeUp 0.8s 0.6s ease both}
+    .card{background:var(--surface);border:1px solid var(--border);width:100%;max-width:720px;position:relative;overflow:hidden}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),var(--purple),transparent)}
+    .corner{position:absolute;width:20px;height:20px;z-index:2}
+    .corner-tl{top:-1px;left:-1px;border-top:2px solid var(--cyan);border-left:2px solid var(--cyan)}
+    .corner-tr{top:-1px;right:-1px;border-top:2px solid var(--cyan);border-right:2px solid var(--cyan)}
+    .corner-bl{bottom:-1px;left:-1px;border-bottom:2px solid var(--cyan);border-left:2px solid var(--cyan)}
+    .corner-br{bottom:-1px;right:-1px;border-bottom:2px solid var(--cyan);border-right:2px solid var(--cyan)}
+    .card-header{padding:28px 36px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan)}
+    .card-step{font-size:0.7rem;color:var(--muted);font-family:'Orbitron',monospace;letter-spacing:1px}
+    .card-body{padding:32px 36px}
+    .symptoms-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+    .symptom-toggle{position:relative}
+    .symptom-toggle input{position:absolute;opacity:0;width:0;height:0}
+    .symptom-toggle label{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;transition:all 0.2s ease}
+    .symptom-toggle label:hover{border-color:var(--border2)}
+    .symptom-toggle input:checked+label{border-color:var(--cyan);background:rgba(0,212,255,0.08);box-shadow:0 0 20px rgba(0,212,255,0.1) inset}
+    .sym-icon{font-size:1.3rem;width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1px solid var(--border);flex-shrink:0;transition:all 0.2s}
+    .symptom-toggle input:checked+label .sym-icon{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,212,255,0.3)}
+    .sym-info{flex:1}
+    .sym-name{font-size:0.9rem;font-weight:500;display:block}
+    .sym-desc{font-size:0.72rem;color:var(--muted);display:block;margin-top:2px}
+    .sym-check{width:18px;height:18px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.6rem;color:transparent;transition:all 0.2s}
+    .symptom-toggle input:checked+label .sym-check{background:var(--cyan);border-color:var(--cyan);color:var(--bg);font-weight:900}
+    .severity-section{margin-bottom:28px;padding:20px;background:var(--surface2);border:1px solid var(--border)}
+    .severity-title{font-family:'Orbitron',monospace;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .severity-title::before{content:'';width:12px;height:1px;background:var(--cyan)}
+    .severity-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;opacity:0.3;transition:opacity 0.3s;pointer-events:none}
+    .severity-row.active{opacity:1;pointer-events:all}
+    .sev-label{font-size:0.78rem;color:var(--text);width:80px;flex-shrink:0}
+    .sev-slider{flex:1;-webkit-appearance:none;appearance:none;height:3px;background:var(--surface3);outline:none}
+    .sev-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--cyan);cursor:pointer;box-shadow:0 0 8px var(--cyan)}
+    .sev-val{font-family:'Orbitron',monospace;font-size:0.75rem;color:var(--cyan);width:50px;text-align:right;flex-shrink:0}
+    .agree-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:24px;padding:14px;background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.15)}
+    .agree-row input{width:16px;height:16px;accent-color:var(--purple);margin-top:2px;flex-shrink:0;cursor:pointer}
+    .agree-row label{font-size:0.82rem;color:var(--muted);line-height:1.5;cursor:pointer}
+    .agree-row label a{color:var(--purple);text-decoration:none}
+    .agree-row label a:hover{text-decoration:underline}
+    .btn-analyze{width:100%;padding:18px;background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s ease}
+    .btn-analyze:hover{box-shadow:0 0 30px rgba(0,212,255,0.2);text-shadow:0 0 10px var(--cyan)}
+    .btn-analyze:disabled{opacity:0.5;cursor:not-allowed}
+    .progress-wrap{margin-top:20px;display:none}
+    .progress-wrap.show{display:block}
+    .progress-label{font-family:'Orbitron',monospace;font-size:0.7rem;letter-spacing:2px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between}
+    .progress-bar{height:3px;background:var(--surface2);overflow:hidden}
+    .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--purple));box-shadow:0 0 8px var(--cyan)}
+    .progress-steps{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .p-step{font-size:0.65rem;color:var(--muted);font-family:'Orbitron',monospace;letter-spacing:1px;padding:4px 8px;border:1px solid var(--border);opacity:0.4;transition:all 0.3s}
+    .p-step.done{color:var(--green);border-color:rgba(16,185,129,0.3);opacity:1}
+    .p-step.active{color:var(--cyan);border-color:var(--cyan);opacity:1}
+    .result-box{margin-top:24px;display:none}
+    .result-box.show{display:block;animation:resultReveal 0.6s ease both}
+    @keyframes resultReveal{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .result-inner{padding:28px;background:var(--surface2);border:1px solid rgba(16,185,129,0.3);position:relative}
+    .result-inner::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+    .result-inner.error-box{border-color:rgba(239,68,68,0.3)}
+    .result-inner.error-box::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
+    .result-tag{font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .result-tag::before{content:'';width:20px;height:1px;background:var(--green)}
+    .result-inner.error-box .result-tag{color:var(--red)}
+    .result-inner.error-box .result-tag::before{background:var(--red)}
+    .result-disease{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;color:var(--text);margin-bottom:12px;text-transform:uppercase}
+    .result-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+    .result-info-card{padding:12px 16px;background:var(--bg);border:1px solid var(--border)}
+    .ric-label{font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'Orbitron',monospace;margin-bottom:6px}
+    .ric-val{font-size:0.85rem;color:var(--text);line-height:1.4}
+    .result-note{font-size:0.78rem;color:var(--muted);line-height:1.6;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+    footer{margin-top:auto;padding:24px 48px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:0.72rem;color:var(--muted);background:rgba(3,7,18,0.6)}
+    .footer-left{font-family:'Orbitron',monospace;letter-spacing:1px}
+    .footer-left span{color:var(--cyan)}
+    .footer-right{display:flex;gap:20px}
+    .footer-right a{color:var(--muted);text-decoration:none}
+    .footer-right a:hover{color:var(--cyan)}
+    @media(max-width:640px){
+      header,.hero,.stats-row,.disclaimer,.main-layout,footer{padding-left:20px;padding-right:20px}
+      .symptoms-grid{grid-template-columns:1fr}
+      .card-body,.card-header{padding:20px}
+      .result-info-grid{grid-template-columns:1fr}
+      .hero h1{font-size:1.8rem}
+      .stats-row{gap:20px}
+    }
+  </style>
+</head>
+<body>
+<div class="bg-canvas">
+  <div class="bg-glow1"></div>
+  <div class="bg-glow2"></div>
+  <div class="scanline"></div>
+</div>
+<div class="wrapper">
+  <header>
+    <div class="logo"><div class="logo-icon">⚕</div>HEALTHLYZER</div>
+    <div class="header-right">
+      <div class="status-dot"><div class="dot-live"></div>SYSTEM ONLINE</div>
+      <div class="nav-badge">IIT PATNA · 2026</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-tag">▶ Random Forest · 9 Diseases · 720 Samples</div>
+    <h1><span class="line1">DIAGNOSE YOUR</span><span class="line2">SYMPTOMS</span></h1>
+    <p>Advanced ML-powered symptom analysis. Select symptoms, set severity, and get an instant AI prediction.</p>
+  </section>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num">72%</div><div class="stat-label">Model Accuracy</div></div>
+    <div class="stat"><div class="stat-num">720</div><div class="stat-label">Training Samples</div></div>
+    <div class="stat"><div class="stat-num">9</div><div class="stat-label">Diseases</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Symptom Inputs</div></div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠ DISCLAIMER:</strong> For academic demonstration only. Not a substitute for professional medical diagnosis.
+  </div>
+
+  <div class="main-layout">
+    <div class="card">
+      <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+      <div class="card-header">
+        <div class="card-title">▶ Symptom Input Module</div>
+        <div class="card-step">CAPSTONE-I · GROUP 50</div>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="/" id="symptomForm">
+          <div class="symptoms-grid">
+            <div class="symptom-toggle">
+              <input type="checkbox" id="fever" name="fever" value="1">
+              <label for="fever">
+                <div class="sym-icon">🌡️</div>
+                <div class="sym-info"><span class="sym-name">Fever</span><span class="sym-desc">Elevated body temperature</span></div>
+                <div class="sym-check">✓</div>
+              </label>
+            </div>
+            <div class="symptom-toggle">
+              <input type="checkbox" id="cough" name="cough" value="1">
+              <label for="cough">
+                <div class="sym-icon">😷</div>
+                <div class="sym-info"><span class="sym-name">Cough</span><span class="sym-desc">Persistent coughing</span></div>
+                <div class="sym-check">✓</div>
+              </label>
+            </div>
+            <div class="symptom-toggle">
+              <input type="checkbox" id="headache" name="headache" value="1">
+              <label for="headache">
+                <div class="sym-icon">🤕</div>
+                <div class="sym-info"><span class="sym-name">Headache</span><span class="sym-desc">Head pain / pressure</span></div>
+                <div class="sym-check">✓</div>
+              </label>
+            </div>
+            <div class="symptom-toggle">
+              <input type="checkbox" id="vomiting" name="vomiting" value="1">
+              <label for="vomiting">
+                <div class="sym-icon">🤢</div>
+                <div class="sym-info"><span class="sym-name">Vomiting</span><span class="sym-desc">Nausea / vomiting</span></div>
+                <div class="sym-check">✓</div>
+              </label>
+            </div>
+            <div class="symptom-toggle" style="grid-column:span 2">
+              <input type="checkbox" id="fatigue" name="fatigue" value="1">
+              <label for="fatigue">
+                <div class="sym-icon">😴</div>
+                <div class="sym-info"><span class="sym-name">Fatigue</span><span class="sym-desc">Extreme tiredness / weakness</span></div>
+                <div class="sym-check">✓</div>
+              </label>
+            </div>
+          </div>
+
+          <div class="severity-section">
+            <div class="severity-title">Symptom Severity (select a symptom to activate)</div>
+            <div class="severity-row" id="sev-fever">
+              <div class="sev-label">Fever</div>
+              <input type="range" class="sev-slider" min="1" max="10" value="5" oninput="updateSev(this,'sev-fever-val')">
+              <div class="sev-val" id="sev-fever-val">5/10</div>
+            </div>
+            <div class="severity-row" id="sev-cough">
+              <div class="sev-label">Cough</div>
+              <input type="range" class="sev-slider" min="1" max="10" value="5" oninput="updateSev(this,'sev-cough-val')">
+              <div class="sev-val" id="sev-cough-val">5/10</div>
+            </div>
+            <div class="severity-row" id="sev-headache">
+              <div class="sev-label">Headache</div>
+              <input type="range" class="sev-slider" min="1" max="10" value="5" oninput="updateSev(this,'sev-headache-val')">
+              <div class="sev-val" id="sev-headache-val">5/10</div>
+            </div>
+            <div class="severity-row" id="sev-vomiting">
+              <div class="sev-label">Vomiting</div>
+              <input type="range" class="sev-slider" min="1" max="10" value="5" oninput="updateSev(this,'sev-vomiting-val')">
+              <div class="sev-val" id="sev-vomiting-val">5/10</div>
+            </div>
+            <div class="severity-row" id="sev-fatigue">
+              <div class="sev-label">Fatigue</div>
+              <input type="range" class="sev-slider" min="1" max="10" value="5" oninput="updateSev(this,'sev-fatigue-val')">
+              <div class="sev-val" id="sev-fatigue-val">5/10</div>
+            </div>
+          </div>
+
+          <div class="agree-row">
+            <input type="checkbox" id="agree" name="agree" value="yes">
+            <label for="agree">I confirm this is not a substitute for medical advice and agree to the <a href="/terms" target="_blank">Terms & Conditions</a>.</label>
+          </div>
+
+          <button type="submit" class="btn-analyze" id="analyzeBtn">
+            ▶ &nbsp; INITIATE ANALYSIS
+          </button>
+
+          <div class="progress-wrap" id="progressWrap">
+            <div class="progress-label">
+              <span id="progressText">INITIALIZING...</span>
+              <span id="progressPct">0%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-steps">
+              <div class="p-step" id="step1">LOADING MODEL</div>
+              <div class="p-step" id="step2">PARSING INPUT</div>
+              <div class="p-step" id="step3">RUNNING CLASSIFIER</div>
+              <div class="p-step" id="step4">GENERATING RESULT</div>
+            </div>
+          </div>
+        </form>
+
+        {% if prediction %}
+          {% if prediction == "You must agree to the Terms & Conditions first." %}
+            <div class="result-box show">
+              <div class="result-inner error-box">
+                <div class="result-tag">System Alert</div>
+                <div class="result-disease" style="font-size:1rem;text-transform:none">{{ prediction }}</div>
+              </div>
+            </div>
+          {% else %}
+            <div class="result-box show">
+              <div class="result-inner">
+                <div class="result-tag">Analysis Complete</div>
+                <div class="result-disease" id="diseaseName">{{ prediction }}</div>
+                <div class="result-info-grid" id="diseaseInfoGrid"></div>
+                <div class="result-note">⚠ This prediction is generated by a Random Forest ML model trained on synthetic academic data. Please consult a qualified healthcare professional for proper medical diagnosis.</div>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">HEALTHLYZER · <span>SALMAN KHURSHID</span> · GROUP 50</div>
+    <div class="footer-right">
+      <a href="/terms">Terms</a>
+      <a href="/privacy">Privacy</a>
+      <span>IIT Patna Capstone-I 2026</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+document.querySelectorAll('.symptom-toggle input').forEach(function(input) {
+  input.addEventListener('change', function() {
+    var row = document.getElementById('sev-' + this.id);
+    if (row) {
+      if (this.checked) row.classList.add('active');
+      else row.classList.remove('active');
+    }
+  });
+});
+
+function updateSev(slider, valId) {
+  document.getElementById(valId).textContent = slider.value + '/10';
+}
+
+document.getElementById('symptomForm').addEventListener('submit', function(e) {
+  var agreed = document.getElementById('agree').checked;
+  if (!agreed) return;
+  e.preventDefault();
+  var wrap = document.getElementById('progressWrap');
+  var fill = document.getElementById('progressFill');
+  var pText = document.getElementById('progressText');
+  var pPct = document.getElementById('progressPct');
+  var steps = ['step1','step2','step3','step4'];
+  var labels = ['LOADING MODEL...','PARSING INPUT...','RUNNING CLASSIFIER...','GENERATING RESULT...'];
+  wrap.classList.add('show');
+  document.getElementById('analyzeBtn').disabled = true;
+  steps.forEach(function(s){ document.getElementById(s).className = 'p-step'; });
+  document.getElementById(steps[0]).className = 'p-step active';
+  pText.textContent = labels[0];
+  var pct = 0, stepIdx = 0;
+  var interval = setInterval(function() {
+    pct += 2;
+    fill.style.width = Math.min(pct,100) + '%';
+    pPct.textContent = Math.floor(Math.min(pct,100)) + '%';
+    var newStep = Math.min(Math.floor(pct/25), 3);
+    if (newStep !== stepIdx) {
+      document.getElementById(steps[stepIdx]).className = 'p-step done';
+      stepIdx = newStep;
+      document.getElementById(steps[stepIdx]).className = 'p-step active';
+      pText.textContent = labels[stepIdx];
+    }
+    if (pct >= 100) {
+      clearInterval(interval);
+      steps.forEach(function(s){ document.getElementById(s).className = 'p-step done'; });
+      pText.textContent = 'SUBMITTING...';
+      setTimeout(function(){ document.getElementById('symptomForm').submit(); }, 300);
+    }
+  }, 20);
+});
+
+var diseaseInfo = {
+  'Flu':            {tip:'Rest and stay hydrated. Antiviral medication may help if taken early.',duration:'5-7 days',common:'Fever, chills, body aches, cough'},
+  'Cold':           {tip:'No cure - rest, fluids, and OTC medication ease symptoms.',duration:'7-10 days',common:'Runny nose, sore throat, mild cough'},
+  'Migraine':       {tip:'Avoid bright lights and loud sounds. Pain relievers may help.',duration:'4-72 hours',common:'Throbbing headache, nausea, sensitivity'},
+  'Typhoid':        {tip:'Requires antibiotic treatment. See a doctor immediately.',duration:'1-4 weeks',common:'High fever, stomach pain, weakness'},
+  'Dengue':         {tip:'No specific antiviral. Hydration and rest are critical.',duration:'2-7 days',common:'High fever, joint pain, rash, headache'},
+  'Malaria':        {tip:'Requires immediate antimalarial medication. See a doctor.',duration:'1-4 weeks',common:'Chills, fever cycles, sweating, fatigue'},
+  'Food Poisoning': {tip:'Stay hydrated. Severe cases need medical attention.',duration:'1-3 days',common:'Nausea, vomiting, diarrhea, cramps'},
+  'Asthma':         {tip:'Use prescribed inhaler. Avoid known triggers.',duration:'Chronic',common:'Wheezing, shortness of breath, chest tightness'},
+  'COVID-19':       {tip:'Isolate, rest, and monitor symptoms. Seek help if severe.',duration:'5-14 days',common:'Fever, dry cough, fatigue, loss of taste'},
+};
+
+window.addEventListener('DOMContentLoaded', function() {
+  var nameEl = document.getElementById('diseaseName');
+  var grid = document.getElementById('diseaseInfoGrid');
+  if (!nameEl || !grid) return;
+  var info = diseaseInfo[nameEl.textContent.trim()];
+  if (!info) return;
+  grid.innerHTML =
+    '<div class="result-info-card"><div class="ric-label">Typical Duration</div><div class="ric-val">' + info.duration + '</div></div>' +
+    '<div class="result-info-card"><div class="ric-label">Common Symptoms</div><div class="ric-val">' + info.common + '</div></div>' +
+    '<div class="result-info-card" style="grid-column:span 2"><div class="ric-label">Suggested Action</div><div class="ric-val">' + info.tip + '</div></div>';
+});
+</script>
+</body>
+</html>
