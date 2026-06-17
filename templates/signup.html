@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Sign Up — Healthlyzer{% endblock %}
+{% block head %}
+<style>
+  .auth-wrap{min-height:calc(100vh - 58px - 60px);display:flex;align-items:center;justify-content:center;padding:40px 16px;background:linear-gradient(160deg,#f0f9ff 0%,#d1fae5 40%,#ede9fe 100%)}
+  .auth-box{width:100%;max-width:460px}
+  .auth-brand{text-align:center;margin-bottom:28px}
+  .auth-brand-icon{width:60px;height:60px;background:linear-gradient(135deg,var(--emerald-d),var(--emerald));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;box-shadow:0 4px 14px rgba(4,120,87,0.3)}
+  .auth-brand h1{font-size:22px;font-weight:800;letter-spacing:-0.3px}
+  .auth-brand p{color:var(--text2);font-size:13px;margin-top:4px}
+  .auth-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,0.08);padding:28px}
+  .auth-footer{text-align:center;margin-top:16px;font-size:13px;color:var(--text2)}
+  .auth-footer a{color:var(--teal-d);font-weight:600;text-decoration:none}
+  .input-wrap{position:relative}
+  .input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+  .input-wrap .form-input{padding-left:36px}
+  .perks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+  .perk{background:var(--teal-ll);border:1px solid #bae6fd;border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--teal-d);font-weight:500}
+  .perk-icon{font-size:16px}
+  .pw-bar{height:4px;border-radius:999px;background:var(--border);overflow:hidden;margin-top:6px}
+  .pw-fill{height:100%;width:0%;border-radius:999px;transition:all 0.3s}
+  .pw-label{font-size:11px;margin-top:4px;font-weight:500}
+  .terms-check{display:flex;align-items:flex-start;gap:9px;padding:12px;background:var(--purple-l);border:1px solid #c4b5fd;border-radius:var(--radius-sm);margin-bottom:16px;font-size:12px;color:var(--text2)}
+  .terms-check input{accent-color:var(--purple-d);margin-top:2px;flex-shrink:0;width:14px;height:14px}
+  .terms-check a{color:var(--purple-d);font-weight:600;text-decoration:none}
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-box">
+    <div class="auth-brand">
+      <div class="auth-brand-icon">🏥</div>
+      <h1>Create your account</h1>
+      <p>Free forever · No credit card needed</p>
+    </div>
+    <div class="auth-card">
+      <div class="perks">
+        <div class="perk"><span class="perk-icon">📊</span>Prediction history</div>
+        <div class="perk"><span class="perk-icon">📈</span>Personal dashboard</div>
+        <div class="perk"><span class="perk-icon">🔒</span>Secure &amp; private</div>
+        <div class="perk"><span class="perk-icon">⚡</span>Instant results</div>
+      </div>
+      <form method="POST" action="/signup">
+        <div class="form-group">
+          <label class="form-label" for="name">Full name</label>
+          <div class="input-wrap">
+            <span class="input-icon">👤</span>
+            <input class="form-input" type="text" id="name" name="name" placeholder="Your full name" required autocomplete="name"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email address</label>
+          <div class="input-wrap">
+            <span class="input-icon">📧</span>
+            <input class="form-input" type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="form-input" type="password" id="password" name="password" placeholder="At least 6 characters" required oninput="checkStrength(this.value)"/>
+          </div>
+          <div class="pw-bar"><div class="pw-fill" id="pwFill"></div></div>
+          <div class="pw-label" id="pwLabel" style="color:var(--text3)"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="confirm">Confirm password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔑</span>
+            <input class="form-input" type="password" id="confirm" name="confirm" placeholder="Repeat password" required/>
+          </div>
+        </div>
+        <div class="terms-check">
+          <input type="checkbox" name="agree_terms" required/>
+          <div>By signing up I agree to the <a href="/terms" target="_blank">Terms &amp; Conditions</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.</div>
+        </div>
+        <button type="submit" class="btn btn-emerald btn-full" style="padding:12px;font-size:14px">Create free account</button>
+      </form>
+    </div>
+    <div class="auth-footer">
+      Already have an account? <a href="/login">Log in →</a>
+    </div>
+  </div>
+</div>
+<script>
+function checkStrength(pw){
+  const fill=document.getElementById('pwFill'),label=document.getElementById('pwLabel');
+  let score=0;
+  if(pw.length>=6)score++;if(pw.length>=10)score++;
+  if(/[A-Z]/.test(pw))score++;if(/[0-9]/.test(pw))score++;if(/[^A-Za-z0-9]/.test(pw))score++;
+  const lvls=[{w:'20%',c:'#ef4444',t:'Very weak'},{w:'40%',c:'#f59e0b',t:'Weak'},{w:'60%',c:'#f59e0b',t:'Fair'},{w:'80%',c:'#10b981',t:'Good'},{w:'100%',c:'#047857',t:'Strong'}];
+  const l=lvls[Math.min(score-1,4)]||{w:'0%',c:'transparent',t:''};
+  fill.style.width=pw.length?l.w:'0%';fill.style.background=l.c;
+  label.textContent=pw.length?l.t:'';label.style.color=l.c;
+}
+</script>
+{% endblock %}

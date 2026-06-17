@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Log In — Healthlyzer{% endblock %}
+{% block head %}
+<style>
+  .auth-wrap{min-height:calc(100vh - 58px - 60px);display:flex;align-items:center;justify-content:center;padding:40px 16px;background:linear-gradient(160deg,#f0f9ff 0%,#e0f2fe 40%,#ede9fe 100%)}
+  .auth-box{width:100%;max-width:440px}
+  .auth-brand{text-align:center;margin-bottom:28px}
+  .auth-brand-icon{width:60px;height:60px;background:linear-gradient(135deg,var(--teal-d),var(--teal));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;box-shadow:0 4px 14px rgba(3,105,161,0.3)}
+  .auth-brand h1{font-size:22px;font-weight:800;letter-spacing:-0.3px}
+  .auth-brand p{color:var(--text2);font-size:13px;margin-top:4px}
+  .auth-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,0.08);padding:28px}
+  .auth-footer{text-align:center;margin-top:16px;font-size:13px;color:var(--text2)}
+  .auth-footer a{color:var(--teal-d);font-weight:600;text-decoration:none}
+  .auth-footer a:hover{text-decoration:underline}
+  .remember-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .remember-label{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2);cursor:pointer}
+  .remember-label input{accent-color:var(--teal-d);width:14px;height:14px}
+  .input-wrap{position:relative}
+  .input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+  .input-wrap .form-input{padding-left:36px}
+  .divider-or{display:flex;align-items:center;gap:12px;margin:18px 0;font-size:12px;color:var(--text3);font-weight:500}
+  .divider-or::before,.divider-or::after{content:'';flex:1;height:1px;background:var(--border)}
+  .guest-link{display:block;text-align:center;font-size:12px;color:var(--text3);text-decoration:none;margin-top:12px}
+  .guest-link:hover{color:var(--text2)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-box">
+    <div class="auth-brand">
+      <div class="auth-brand-icon">⚕</div>
+      <h1>Welcome back</h1>
+      <p>Log in to access your dashboard &amp; history</p>
+    </div>
+    <div class="auth-card">
+      <form method="POST" action="/login">
+        <div class="form-group">
+          <label class="form-label" for="email">Email address</label>
+          <div class="input-wrap">
+            <span class="input-icon">📧</span>
+            <input class="form-input" type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="form-input" type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password"/>
+          </div>
+        </div>
+        <div class="remember-row">
+          <label class="remember-label">
+            <input type="checkbox" name="remember"/> Remember me for 30 days
+          </label>
+        </div>
+        <button type="submit" class="btn btn-teal btn-full" style="padding:12px;font-size:14px">Log in to Healthlyzer</button>
+      </form>
+      <div class="divider-or">or</div>
+      <a href="/" class="btn btn-outline btn-full" style="padding:12px">Continue without account</a>
+    </div>
+    <div class="auth-footer">
+      Don't have an account? <a href="/signup">Create one free →</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

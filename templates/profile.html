@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Profile — Healthlyzer{% endblock %}
+{% block head %}
+<style>
+  .profile-hero{background:linear-gradient(135deg,var(--emerald-d) 0%,#0d9488 60%,var(--teal-d) 100%);padding:32px 32px 52px;color:#fff;position:relative;overflow:hidden}
+  .profile-hero::after{content:'👤';position:absolute;right:32px;top:50%;transform:translateY(-50%);font-size:80px;opacity:0.08;pointer-events:none}
+  .profile-hero h1{font-size:20px;font-weight:800}
+  .profile-hero p{color:rgba(255,255,255,0.75);font-size:13px;margin-top:4px}
+  .profile-content{max-width:900px;margin:-24px auto 0;padding:0 32px 60px;position:relative;z-index:1}
+  .profile-layout{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start}
+
+  /* Sidebar */
+  .profile-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .profile-card-top{padding:28px 20px;text-align:center;background:linear-gradient(160deg,#f0fdf4,#ecfdf5)}
+  .profile-avatar-big{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--teal-d),var(--emerald));display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin:0 auto 14px;box-shadow:0 4px 14px rgba(3,105,161,0.3)}
+  .profile-name{font-size:16px;font-weight:800;color:var(--text)}
+  .profile-email{font-size:12px;color:var(--text3);margin-top:3px}
+  .profile-stats-row{display:flex;border-top:1px solid var(--border)}
+  .pstat{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--border)}
+  .pstat:last-child{border-right:none}
+  .pstat-val{font-size:18px;font-weight:800;color:var(--text)}
+  .pstat-lbl{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.4px}
+  .profile-card-nav{padding:8px}
+  .profile-nav-link{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--text2);text-decoration:none;transition:all 0.15s}
+  .profile-nav-link:hover,.profile-nav-link.active{background:var(--teal-l);color:var(--teal-d)}
+  .profile-nav-link span{font-size:16px}
+
+  /* Right column */
+  .form-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+  .form-card-header{padding:14px 20px;border-bottom:1px solid var(--border);background:#fafbff;display:flex;align-items:center;gap:10px}
+  .form-card-header h3{font-size:14px;font-weight:700;color:var(--text)}
+  .form-card-header p{font-size:12px;color:var(--text3);margin-top:1px}
+  .form-card-body{padding:20px}
+  .form-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  .danger-zone{background:#fff;border:1.5px solid #fca5a5;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .danger-zone-header{padding:14px 20px;background:#fef2f2;border-bottom:1px solid #fca5a5;display:flex;align-items:center;gap:8px}
+  .danger-zone-header h3{font-size:14px;font-weight:700;color:var(--red-d)}
+  .danger-zone-body{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .danger-zone-body p{font-size:13px;color:var(--text2)}
+  .danger-zone-body small{display:block;font-size:11px;color:var(--text3);margin-top:2px}
+
+  @media(max-width:768px){.profile-layout{grid-template-columns:1fr}.profile-content{padding:0 16px 60px}.profile-hero{padding:24px 16px 40px}.form-2col{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="profile-hero">
+  <h1>My Profile</h1>
+  <p>Manage your account details and preferences</p>
+</div>
+
+<div class="profile-content">
+  <div class="profile-layout">
+
+    <!-- Sidebar -->
+    <div>
+      <div class="profile-card">
+        <div class="profile-card-top">
+          <div class="profile-avatar-big">{{ current_user.name[0].upper() }}</div>
+          <div class="profile-name">{{ current_user.name }}</div>
+          <div class="profile-email">{{ current_user.email }}</div>
+        </div>
+        <div class="profile-stats-row">
+          <div class="pstat">
+            <div class="pstat-val">{{ current_user.prediction_count() }}</div>
+            <div class="pstat-lbl">Analyses</div>
+          </div>
+          <div class="pstat">
+            <div class="pstat-val">{{ current_user.created_at.strftime('%Y') }}</div>
+            <div class="pstat-lbl">Joined</div>
+          </div>
+        </div>
+        <div class="profile-card-nav">
+          <a href="/dashboard" class="profile-nav-link"><span>📊</span>Dashboard</a>
+          <a href="/" class="profile-nav-link"><span>🩺</span>New Analysis</a>
+          <a href="/about" class="profile-nav-link"><span>ℹ️</span>About Project</a>
+          <a href="/logout" class="profile-nav-link" style="color:var(--red-d)"><span>🚪</span>Log Out</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div>
+      <!-- Personal Info -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="card-icon card-icon-teal">👤</div>
+          <div>
+            <h3>Personal Information</h3>
+            <p>Update your display name</p>
+          </div>
+        </div>
+        <div class="form-card-body">
+          <form method="POST" action="/profile">
+            <input type="hidden" name="action" value="update_name"/>
+            <div class="form-2col">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="name">Full Name</label>
+                <input class="form-input" type="text" id="name" name="name" value="{{ current_user.name }}" required/>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">Email Address</label>
+                <input class="form-input" type="email" value="{{ current_user.email }}" disabled/>
+              </div>
+            </div>
+            <div style="margin-top:14px">
+              <button type="submit" class="btn btn-teal">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="card-icon card-icon-emerald">🔒</div>
+          <div>
+            <h3>Change Password</h3>
+            <p>Choose a strong password</p>
+          </div>
+        </div>
+        <div class="form-card-body">
+          <form method="POST" action="/profile">
+            <input type="hidden" name="action" value="change_password"/>
+            <div class="form-group">
+              <label class="form-label" for="cpw">Current Password</label>
+              <input class="form-input" type="password" id="cpw" name="current_password" placeholder="••••••••" required/>
+            </div>
+            <div class="form-2col">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="npw">New Password</label>
+                <input class="form-input" type="password" id="npw" name="new_password" placeholder="At least 6 characters" required/>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="cfpw">Confirm New Password</label>
+                <input class="form-input" type="password" id="cfpw" name="confirm_password" placeholder="Repeat new password" required/>
+              </div>
+            </div>
+            <div style="margin-top:14px">
+              <button type="submit" class="btn btn-outline">Update Password</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="danger-zone">
+        <div class="danger-zone-header">
+          <span style="font-size:16px">⚠️</span>
+          <h3>Danger Zone</h3>
+        </div>
+        <div class="danger-zone-body">
+          <div>
+            <p>Clear all prediction history</p>
+            <small>Permanently delete all {{ current_user.prediction_count() }} analyses. This cannot be undone.</small>
+          </div>
+          <form method="POST" action="/dashboard/clear" onsubmit="return confirm('Delete all history? This cannot be undone.')">
+            <button type="submit" class="btn btn-danger btn-sm">🗑 Clear History</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

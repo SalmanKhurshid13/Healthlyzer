@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}About — Healthlyzer{% endblock %}
+{% block head %}
+<style>
+  .about-hero{background:linear-gradient(135deg,#4c1d95 0%,var(--purple-d) 50%,var(--teal-d) 100%);padding:52px 32px;text-align:center;color:#fff;position:relative;overflow:hidden}
+  .about-hero::before{content:'🔬';position:absolute;left:5%;top:50%;transform:translateY(-50%);font-size:100px;opacity:0.06}
+  .about-hero::after{content:'🧬';position:absolute;right:5%;top:50%;transform:translateY(-50%);font-size:100px;opacity:0.06}
+  .about-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:5px 14px;border-radius:999px;margin-bottom:16px}
+  .about-hero h1{font-size:32px;font-weight:800;letter-spacing:-0.5px;margin-bottom:10px}
+  .about-hero p{font-size:15px;color:rgba(255,255,255,0.8);max-width:520px;margin:0 auto;line-height:1.7}
+  .about-content{max-width:1000px;margin:0 auto;padding:40px 32px 80px}
+
+  /* Model Stats */
+  .model-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px}
+  .mstat{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px 18px;text-align:center;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .mstat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+  .mstat.teal::before{background:linear-gradient(90deg,var(--teal-d),var(--teal))}
+  .mstat.emerald::before{background:linear-gradient(90deg,var(--emerald-d),var(--emerald))}
+  .mstat.purple::before{background:linear-gradient(90deg,var(--purple-d),var(--purple))}
+  .mstat.amber::before{background:linear-gradient(90deg,var(--amber-d),var(--amber))}
+  .mstat.pink::before{background:linear-gradient(90deg,var(--pink-d),var(--pink))}
+  .mstat.red::before{background:linear-gradient(90deg,var(--red-d),var(--red))}
+  .mstat-val{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.5px;line-height:1}
+  .mstat-lbl{font-size:11px;color:var(--text3);margin-top:5px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
+
+  .section-block{margin-bottom:36px}
+  .section-block-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .section-block-title span{font-size:20px}
+
+  /* Symptoms */
+  .sym-pills{display:flex;flex-wrap:wrap;gap:7px}
+  .sym-pill{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--text2);box-shadow:var(--shadow)}
+  .sym-pill-emoji{font-size:14px}
+
+  /* Diseases */
+  .disease-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+  .dcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center;box-shadow:var(--shadow)}
+  .dcard-emoji{font-size:22px;margin-bottom:5px}
+  .dcard-name{font-size:11px;font-weight:700;color:var(--text)}
+
+  /* Stack */
+  .stack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+  .stack-item{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
+  .stack-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .stack-name{font-size:12px;font-weight:600;color:var(--text)}
+
+  /* Team */
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+  .team-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;box-shadow:var(--shadow)}
+  .team-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;margin:0 auto 12px}
+  .team-name{font-size:13px;font-weight:700;color:var(--text)}
+  .team-role{font-size:11px;color:var(--text3);margin-top:3px}
+
+  /* Disclaimer */
+  .disclaimer{background:linear-gradient(135deg,#fef2f2,#fff7ed);border:1.5px solid #fca5a5;border-radius:var(--radius);padding:24px;margin-top:8px}
+  .disclaimer h3{font-size:15px;font-weight:800;color:var(--red-d);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .disclaimer p{font-size:13px;color:var(--text2);line-height:1.7}
+  .disclaimer strong{color:var(--red-d)}
+
+  @media(max-width:768px){.model-stats{grid-template-columns:1fr 1fr}.about-content{padding:32px 16px 60px}.about-hero{padding:40px 16px}}
+  @media(max-width:480px){.model-stats{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="about-hero">
+  <div class="about-badge">🏥 Academic Project · IIT Patna</div>
+  <h1>About Healthlyzer</h1>
+  <p>An AI-powered symptom analysis tool built as Capstone-I by Group 50 of IIT Patna's Hybrid UG Program in Computer Science &amp; Data Analytics.</p>
+</div>
+
+<div class="about-content">
+
+  <!-- Model Stats -->
+  <div class="section-block">
+    <div class="section-block-title"><span>📊</span>Model Performance</div>
+    <div class="model-stats">
+      <div class="mstat teal"><div class="mstat-val">85.8%</div><div class="mstat-lbl">Test Accuracy</div></div>
+      <div class="mstat emerald"><div class="mstat-val">86%</div><div class="mstat-lbl">CV Accuracy (5-fold)</div></div>
+      <div class="mstat purple"><div class="mstat-val">3,000</div><div class="mstat-lbl">Training Samples</div></div>
+      <div class="mstat amber"><div class="mstat-val">15</div><div class="mstat-lbl">Input Symptoms</div></div>
+      <div class="mstat pink"><div class="mstat-val">15</div><div class="mstat-lbl">Disease Classes</div></div>
+      <div class="mstat red"><div class="mstat-val">200</div><div class="mstat-lbl">Samples / Disease</div></div>
+    </div>
+  </div>
+
+  <!-- Symptoms -->
+  <div class="section-block">
+    <div class="section-block-title"><span>🩺</span>Symptoms Analyzed</div>
+    <div class="sym-pills">
+      {% set syms=[('🌡️','Fever'),('😮‍💨','Cough'),('🤕','Headache'),('🤢','Vomiting'),('😴','Fatigue'),('💪','Body Ache'),('🦠','Sore Throat'),('🤧','Runny Nose'),('❤️‍🩹','Chest Pain'),('💨','Shortness of Breath'),('🩹','Skin Rash'),('👅','Loss of Taste'),('🚽','Diarrhea'),('🥶','Chills'),('🦵','Muscle Weakness')] %}
+      {% for emoji,name in syms %}
+      <div class="sym-pill"><span class="sym-pill-emoji">{{emoji}}</span>{{name}}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Diseases -->
+  <div class="section-block">
+    <div class="section-block-title"><span>🔬</span>Detectable Conditions</div>
+    <div class="disease-grid">
+      {% set diseases=[('🤧','Flu'),('🤒','Cold'),('🤯','Migraine'),('🦠','Typhoid'),('🦟','Dengue'),('🦠','Malaria'),('🤮','Food Poisoning'),('😮‍💨','Asthma'),('😷','COVID-19'),('🫁','Pneumonia'),('🐔','Chickenpox'),('💛','Jaundice'),('👃','Sinusitis'),('🤢','Gastroenteritis'),('😤','Bronchitis')] %}
+      {% for emoji,name in diseases %}
+      <div class="dcard"><div class="dcard-emoji">{{emoji}}</div><div class="dcard-name">{{name}}</div></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Tech Stack -->
+  <div class="section-block">
+    <div class="section-block-title"><span>⚙️</span>Technology Stack</div>
+    <div class="stack-grid">
+      {% set stack=[('#0ea5e9','Python 3'),('#10b981','Flask'),('#f59e0b','scikit-learn'),('#8b5cf6','Random Forest'),('#ec4899','SQLAlchemy'),('#06b6d4','Flask-Login'),('#a855f7','Flask-Bcrypt'),('#ef4444','Render.com'),('#475569','Gunicorn')] %}
+      {% for color,name in stack %}
+      <div class="stack-item">
+        <div class="stack-dot" style="background:{{color}}"></div>
+        <div class="stack-name">{{name}}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Team -->
+  <div class="section-block">
+    <div class="section-block-title"><span>👨‍💻</span>The Team · Group 50</div>
+    <div class="team-grid">
+      {% set avatarcolors=['linear-gradient(135deg,#0369a1,#0ea5e9)','linear-gradient(135deg,#047857,#10b981)','linear-gradient(135deg,#6d28d9,#8b5cf6)','linear-gradient(135deg,#92400e,#f59e0b)','linear-gradient(135deg,#9d174d,#ec4899)'] %}
+      {% set team=[('Salman Khurshid','Project Lead · UA2503CDH483'),('Kartavya','Backend & ML'),('Saurabh','Data & Training'),('Abhay','Frontend'),('Rijul Koul','Testing & Docs')] %}
+      {% for name,role in team %}
+      <div class="team-card">
+        <div class="team-avatar" style="background:{{avatarcolors[loop.index0]}}">{{name[0]}}</div>
+        <div class="team-name">{{name}}</div>
+        <div class="team-role">{{role}}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:14px;padding:12px 16px;background:#f8fafc;border-radius:var(--radius-sm);font-size:12px;color:var(--text3)">
+      🏛️ Indian Institute of Technology Patna · Hybrid UG — Computer Science &amp; Data Analytics · Capstone-I · 2026 ·
+      <a href="https://github.com/SalmanKhurshid13/Healthlyzer" target="_blank" style="color:var(--teal-d);font-weight:600">GitHub →</a>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    <h3>⚠️ Medical Disclaimer</h3>
+    <p>Healthlyzer is strictly an academic demonstration project developed by students of IIT Patna. It is <strong>NOT a certified diagnostic tool</strong>, NOT a medical device, and NOT a substitute for professional medical care. All predictions are generated by a machine learning model trained on <strong>synthetic data</strong>. Always consult a qualified healthcare professional for any real medical concerns. <strong>Emergency (India): 112 / 108</strong></p>
+  </div>
+
+</div>
+{% endblock %}
